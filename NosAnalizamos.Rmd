@@ -5,10 +5,12 @@ date: "`r Sys.Date()`"
 output:
   
   bookdown::html_document2:
-    
+    number_sections: true
+    toc: TRUE
     fig_caption: yes
     df_print: kable
   bookdown::pdf_document2:
+    number_sections: true
     fig_caption: yes
     df_print: kable
 subtitle: "Tratamiento de Datos. Grado en Ciencia de Datos - UV"
@@ -23,6 +25,12 @@ lang: "`r switch(params$lang, ES = 'es-ES', EN = 'en-US')`"
 # Limpiar el entorno
 rm(list=ls())
 ```
+
+## Enunciado
+
+1. Crea un proyecto llamado NosAnalizamos con un fichero Rmarkdown denominado NosAnalizamos.Rmd y al menos una carpeta (data) que contenga el fichero de datos.
+
+## Enunciado
 
 2. Asegúrate que se instalan las librerías necesarias en caso de que no estén instaladas en el ordenador en el que se ejecuta el proyecto.
 
@@ -45,6 +53,8 @@ pacman::p_load(tidyverse, readxl, lubridate, knitr, visdat, GGally, PerformanceA
 ```
 
 # Carga de datos
+
+## Enunciado
 
 3. Carga el fichero de datos en R y llama datos al data frame obtenido. Este data frame contendrá exclusivamente las columnas con variables y las filas que contengan datos. Se sabe que los datos empiezan en la fila 25 pero NO cuántos alumnos puede haber por lo que la determinación selección de filas con datos debe ser AUTOMÁTICA.
 
@@ -177,12 +187,16 @@ vis_miss(datos)
 
 ## Tratamiento de datos
 
+## Enunciado
+
 4. Elimina al usuario cuyo id es martsobm del conjunto de datos.
 
 ```{r}
 datos <- datos %>%
   filter(!Id =='martsobm')
 ```
+
+## Enunciado
 
 5. Selecciona las columnas  con las calificaciones y adecúalas para que al transformar a tipo numérico los valores sean correctos (recuerda que el separador decimal es el punto). Si alguna calificación es NC se sustituirá por 3. Cualquier otro valor no conocido se sustituirá por NA (por ejemplo "6 y pico", no es un valor conocido).
 
@@ -225,7 +239,11 @@ datos[inicio_cal:final_cal] <- datos %>%
                                                .fns = ~ifelse(.=='NC', 3, round(as.numeric(.), 1)))) # Un decimal 
 ```
 
+## Enunciado
+
 6. Obtén una tabla de estadísticos de estas variables. Donde en la primera columnas aparezca cada una de las asignaturas y las siguientes columnas se correspondan con los  estadísticos que se indican, en este orden: valor mínimo, percentil25, mediana, valor medio, desviació típica, percentil75, valor máximo. Los resultados se mostrarán con 2 decimales.
+
+Vease tabla \@ref(tab:tabla-tidy1).
 
 ```{r tabla-tidy1}
 df_notas <- datos[inicio_cal:final_cal]
@@ -252,6 +270,8 @@ kable(df_estadisticos_notas,
 
 Ver tabla \@ref(tab:tabla-tidy1).
 
+## Enunciado
+
 7. Usa la función ggpairs de la librería GGally y representa las relaciones entre todas las variables.
 
 ```{r figura-relaciones, fig.cap='Relacion entre todas las variables'}
@@ -263,6 +283,8 @@ df_estadisticos_notas %>%
 ```
 
 Podemos ver en la figura \@ref(fig:figura-relaciones) que hay una relación positiva entre la nota media, mediana y el percentil 75 que obtuvieron los estudiantes de tal curso. 
+
+## Enunciado
 
 8. Determina las matrices de correlación y covarianza de dichas variables, con las opciones "Spearman" y "Pearson" e indica qué  pares de variables tienen la correlación más alta. 
 
@@ -307,6 +329,8 @@ df_estadisticos_notas %>%
 
 En las figuras \@ref(fig:figura-cor-pearson) y \@ref(fig:figura-cor-spearman) se puede identificar que las variables con la correlación más alta son percentil 75, media y mediana. 
 
+## Enunciado
+
 9. Representa en una misma gráfica los boxplots con las calificaciones obtenidas en las diferentes asignaturas.
 
 ```{r}
@@ -319,15 +343,17 @@ df_notas %>%
   labs (title = 'Calificaciones obtenidas en las diferentes asignaturas')
 ```
 
+## Enunciado
+
 10. Añade la variable sexo al conjunto de datos y realiza la representación del boxplot de calificaciones por asignatura coloreando según dicha variable.
 
-```{r echo=FALSE, eval=FALSE}
+Vease la representación en la figura \@ref(fig:figura-calificaciones).
+
+```{r, eval=FALSE, echo=FALSE}
 # Ver y contar los valores de la variable sexo
 datos %>%
   count(Sex) # Solo hay valores con F y M mayuscula. En caso de no, habría que hacer un map para consolidar 
 ```
-
-Correccion sobre la columa sexo.
 
 ```{r}
 # Corregir los valores de la columna Sex
@@ -359,9 +385,7 @@ datos <- datos %>%
             mutate(Sex = fct_collapse(Sex, F = femenino))
 ```
 
-
-
-```{r}
+```{r figura-calificaciones, fig.cap='Calificaciones por asignatura'}
 datos %>%
   select(Sex, ALG:MD) %>%
   pivot_longer(cols = ALG:MD,
@@ -373,9 +397,13 @@ datos %>%
   
 ```
 
+## Enunciado
+
 11. Selecciona los alumnos que tiene calificaciones en todas las asignaturas y represéntalas gráficamente.  En el eje X aparecerá el usuario del alumno (girado 90º) y en el eje Y la calificación numérica con un color distinto para cada asignatura. Se mostrará un diagrama de líneas, que una las calificaciones de una misma asignatura para todos los alumnos así como un punto, por asignatura (del mismo color que las líneas), para cada asignatura y alumno.
 
-```{r fig.cap='Representacion de alumnos con asignaturas completas'}
+Vease la figura \@ref(fig:figura-casoscom).
+
+```{r figura-casoscom, fig.cap='Representacion de alumnos con asignaturas completas'}
 # CASOS COMPLETOS  
 datos %>%
   select(Id, ALG:MD) %>%
@@ -397,6 +425,8 @@ datos %>%
   theme(axis.text.x = element_text(angle = 90))
 ```
 
+## Enunciado
+
 12. Sin hacer ninguna modificación en el código utiliza el fichero correspondiente al año 2025 y compara los resultados con los del curso 2022
 
 No se han obtenido los mismos resultados. Habían valores/errores que no estaban considerados en el fichero 2022. 
@@ -413,11 +443,13 @@ A pesar de que los valores son notablemente diferentes, se puede apreciar la cor
 
 $\textbf{Nota: Se han hecho los respectivos cambios para continuar con los siguientes apartados.}$
 
-- ¿Qué edad, expresada en años (con decimales) tiene el alumno más joven a fecha 01/02/2025.
+### Enunciado
+
+1. ¿Qué edad, expresada en años (con decimales) tiene el alumno más joven a fecha 01/02/2025.
 
 En principio, el formato de fecha debe ser dd-mm-yyy. Sin embargo, sabemos que se pueden presentar otros formatos, debido al error humano. 
 
-```{r}
+```{r eval=FALSE}
 # EXPRESION REGULAR PARA VER LOS FORMATOS DE FECHA
 # ^ inicio de la cadena 
 # \\d <- Será un digito
@@ -446,13 +478,17 @@ datos <- datos %>%
             # Convertimos a enteros para comprobar que los valores no estén fuera de rango 
             mutate(across(.cols = dia:anio,
                           .fns = ~ as.integer(.)))
+```
 
+```{r eval=FALSE}
 # Comprobamos 
 datos %>%
   select(dia:anio) %>%
   filter(dia > 31 | mes > 12 | anio > 2010)
-  # De haber datos que cumplan esto, habría que tratarlos 
+  # De haber datos que cumplan esto, habría que tratarlos
+```
 
+```{r}
 # Unir los datos para convertir a fecha en el formato adecuado 
 datos <- datos %>%
             mutate(across(.cols = dia:anio,
@@ -465,44 +501,93 @@ datos <- datos %>%
 
 Ahora hacemos las operaciones correspondientes para la edad del alumno más joven a fecha 01/02/2025.
 
-```{r}
+```{r tabla-edad}
 # Asignamos la fecha para comparar
 fecha <- '01/02/2025'
 fecha_filtro <- as.Date(fecha, format = '%d/%m/%Y') # Formato en que se recibe 
 fecha_filtro <- as.Date(fecha_filtro, format = '%d-%m-%Y') # Formato en que se compara 
 
 # Operamos 
-datos %>%
+t <- datos %>%
   select(Fecha, Id) %>%
   # interval(fechainicio, fechafin), days(1), weeks(1), months(1)...
   mutate(Edad = round(interval(Fecha, fecha_filtro) / years(1), 2)) %>%
   arrange(Edad) %>%
   head(., 1)
+
+kable(t, caption = 'Estudiante más joven', booktabs = FALSE)
 ```
 
-El estudiante más joven es 'delcarmo', con 18.09 años de edad. 
+En la tabla \@ref(tab:tabla-edad) podemos apreciar que el estudiante más joven a la fecha es 'delcarmo'.
+
+### Enunciado
 
 2. Cuántos alumnos simultánean trabajo y estudios.
 
 Para comprobar esto, haremos uso de la variable 'Hwork'. A priori, los registros son de estudiantes. Por lo tanto, lo unico que nos interesa saber, es si trabaja (Hwor > 0), o no.
 
-```{r}
+```{r eval=FALSE}
 datos %>%
   mutate(Hwork = as.integer(Hwork)) %>%
   count(Hwork) # Vemos los diferentes valores que hay para Hwork
+```
 
-datos %>%
+```{r tabla-EyT}
+EyT <- datos %>%
   mutate(Hwork = as.integer(Hwork)) %>%
   # Se debe pasar una lista = list(columna = valor)
   replace_na(list(Hwork = 0)) %>%
   count(Hwork) %>%
   filter(Hwork != 0) %>%
-  summarise('Trabajan y estudian' = sum(n))
+  summarise('Total' = sum(n))
+
+kable(EyT, 
+      caption = 'Estudiantes que trabajan y estudian',
+      booktabs = FALSE)    
+```
+
+### Enunciado
+
+3. Hay más hombres o más mujeres fumadoras.
+
+```{r eval=FALSE}
+datos %>%
+  count(Smoke) # Vemos los valores que recibe la variable Smoke, ya que Sex está normalizado
+```
+
+```{r}
+# Estandarizamos la variable 
+datos <- datos %>%
+            mutate(Smoke = str_trim(Smoke)) %>% # Eliminar espacios 
+            mutate(Smoke = str_to_lower(Smoke)) # Dejar todo en minuscula
+
+datos %>% count(Smoke) # Valores recibidos no, si, de fiesta
+
+datos <- datos %>%
+            mutate(Smoke = ifelse(Smoke != 'no', 'si', Smoke))
   
 ```
 
-3. 
+Una vez que ya se ha normalizado, contamos.
 
+```{r tabla-fuman}
+fuman <- datos %>% 
+  select(Sex, Smoke) %>%
+  # Como queremos saber los que fuman, ya sean hombres o mujeres
+  filter(Smoke == 'si') %>%
+  
+  # Agrupamos por sexo y contamos 
+  group_by(Sex) %>%
+  count(name = 'Fuman')
+
+kable(fuman, 
+      caption = 'Total de hombres y mujeres fumadoras',
+      booktabs = FALSE)
+```
+
+En la tabla En la tabla \@ref(tab:tabla-fuman), vemos que hay más hombres que fuman. 
+
+### Enunciado
 
 
 
