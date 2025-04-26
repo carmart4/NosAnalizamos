@@ -4,13 +4,13 @@ author: "Carlos Santiago Martinez Torres"
 date: "`r Sys.Date()`"
 output:
   
+  bookdown::pdf_document2:
+    number_sections: true
+    fig_caption: yes
+    df_print: kable
   bookdown::html_document2:
     number_sections: true
     toc: TRUE
-    fig_caption: yes
-    df_print: kable
-  bookdown::pdf_document2:
-    number_sections: true
     fig_caption: yes
     df_print: kable
 subtitle: "Tratamiento de Datos. Grado en Ciencia de Datos - UV"
@@ -660,12 +660,83 @@ datos <- datos %>%
 ```
 
 ```{r}
-datos %>%
-  select(Sex, NW.Hnd) %>%
-  group_by(Sex, NW.Hnd) %>%
-  count()
-  chisq.test(., correct = F)
+t_mano <- datos %>%
+            select(Sex, NW.Hnd) %>%
+            mutate(Sex = as.character(Sex), NW.Hnd = as.character(NW.Hnd)) %>%
+            table() 
+t_mano %>% plot(col = c('lightblue', 'lightgreen'), main = 'Mano con la que se escribe')
 ```
+
+Hacemos la comprobacion con el chi-cuadrado. Es importante saber que partimos desde Ho, que es una hipotesis, de que los datos son independientes. Por lo tanto:
+
+```{r eval=FALSE}
+# p<0.05 —> Rechazamos hipótesis = No son independientes 
+# p>=0.05 —> Aceptamos Ho = Son independientes y por tanto, no hay relación entre los datos 
+chi2 <- chisq.test(t_mano, correct = F) # Valores muy pequeños. Resultados pueden ser incorrectos 
+```
+Dado que los valores son pequeños para la mano izquierda, vamos a comprobar solo con la mano Derecha. 
+
+```{r}
+t_mano_d <- datos %>%
+            select(Sex, NW.Hnd) %>%
+            mutate(Sex = as.character(Sex), NW.Hnd = as.character(NW.Hnd)) %>%
+            filter(NW.Hnd == 'D') %>%
+            table() 
+t_mano_d %>% plot(col = 'lightblue', main = 'Estudiantes que escriben con la mano Derecha')
+```
+```{r}
+# p<0.05 —> Rechazamos hipótesis = No son independientes 
+# p>=0.05 —> Aceptamos Ho = Son independientes y por tanto, no hay relación entre los datos 
+chi2 <- chisq.test(t_mano_d, correct = F) # Valores muy pequeños. Resultados pueden ser incorrectos
+chi2
+```
+
+Evaluando solo la mano derecha, podríamos decir que si hay una asociacion entre el sexo y escribir con la mano derecha. Sin embargo, dado la proporción de mujeres y hombres en el aula, no es posible asumirlo correctamente. 
+
+### Enunciado 
+
+6. Existe una relación lineal entre la altura (Height) y la distancia del extremo del meñique al extremo del pulgar de la mano con la que escribimos (Wr.Hnd)
+
+```{r eval=FALSE}
+# Verificamos los datos de la columna Height
+datos %>% 
+  filter(is.na(Height)) # No tenemos valores nulos 
+```
+
+```{r eval=FALSE}
+# Hacemos la conversión a entero 
+datos %>%
+  mutate(Height = as.integer(Height)) # Hay error por la coma 
+```
+
+```{r}
+# Corregimos el dato 
+datos <- datos %>%
+            mutate(across(.col = Height,
+                          .fns = ~ str_replace_all(., ',', '.'))) %>%
+            mutate(Height = as.numeric(Height))
+```
+
+```{r eval=FALSE}
+# Verificamos datos 
+# Dado que conocemos el grupo, ningun alumno mide menos de 1 metro = 100 cm, y ninguno mide mas de 2 metros = 200 cm
+datos %>%
+  filter(Height < 100 | Height > 200)
+```
+```{r}
+# Corregimos el dato, usando el filtro anterior. 
+datos <- datos %>%
+            mutate(Height = ifelse(Height < 100, Height * 100, Height))
+
+```
+
+Una vez que tenemos limpia la columna, procedemos.
+
+```{r}
+head(datos)
+```
+
+
 
 
 
