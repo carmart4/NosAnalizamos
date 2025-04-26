@@ -515,7 +515,7 @@ t <- datos %>%
   arrange(Edad) %>%
   head(., 1)
 
-kable(t, caption = 'Estudiante más joven', booktabs = FALSE)
+kable(t, caption = 'Estudiante mas joven', booktabs = FALSE)
 ```
 
 En la tabla \@ref(tab:tabla-edad) podemos apreciar que el estudiante más joven a la fecha es 'delcarmo'.
@@ -533,10 +533,12 @@ datos %>%
 ```
 
 ```{r tabla-EyT}
-EyT <- datos %>%
+datos <- datos %>%
   mutate(Hwork = as.integer(Hwork)) %>%
   # Se debe pasar una lista = list(columna = valor)
-  replace_na(list(Hwork = 0)) %>%
+  replace_na(list(Hwork = 0))
+
+EyT <- datos %>%
   count(Hwork) %>%
   filter(Hwork != 0) %>%
   summarise('Total' = sum(n))
@@ -588,6 +590,87 @@ kable(fuman,
 En la tabla En la tabla \@ref(tab:tabla-fuman), vemos que hay más hombres que fuman. 
 
 ### Enunciado
+
+4. Cuál es el valor medio y la varianza de la variable Wr.Hnd según el sexo.
+
+```{r eval=FALSE}
+# Verificamos los valores 
+datos %>%
+  filter(is.na(Wr.Hnd))
+```
+
+```{r eval=FALSE}
+datos %>%
+  mutate(Wr.Hnd = as.double(Wr.Hnd)) %>% # Esto nos presenta un error por la presencia de coma
+  filter(is.na(Wr.Hnd))
+```
+
+```{r}
+# Hacemos la conversion de dato
+datos <- datos %>%
+  mutate(across(.col = Wr.Hnd,
+                .fns = ~ str_replace_all(., ',', '.'))) %>%
+  mutate(Wr.Hnd = as.numeric(Wr.Hnd))
+```
+
+```{r}
+datos %>%
+  select(Sex, Wr.Hnd) %>%
+  group_by(Sex) %>%
+  summarise(Valor_medio = mean(Wr.Hnd),
+            Varianza = var(Wr.Hnd))
+```
+
+### Enunciado 
+
+5. Determina si existe relación entre el sexo y la mano con la que se escribe (NW.Hnd)
+
+```{r eval=FALSE}
+# Vemos los valores que recibe la variable 
+datos %>% 
+  distinct(NW.Hnd)
+```
+
+
+```{r}
+# Limpieza de la columna NW.Hnd
+datos <- datos %>%
+            mutate(NW.Hnd = str_trim(NW.Hnd)) %>% # Eliminar los espacios 
+            mutate(NW.Hnd = str_to_upper(NW.Hnd)) # Dejar todo en mayuscula 
+
+# Verificamos valores 
+datos %>% 
+  distinct(NW.Hnd) # Vemos que aún hay un error
+
+# Valores a corregir  
+escribe <- datos %>%
+              distinct(NW.Hnd) %>% # Valores que recibe la columna 
+              as.vector()
+escribe <- escribe[[1]]
+```
+
+```{r}
+Esc_Der <- escribe[which(str_detect(string = escribe, pattern = '^D'))]
+Esc_Izq <- escribe[which(str_detect(string = escribe, pattern = '^I'))]
+
+# Corregimos los valores en el dataframe original 
+datos <- datos %>% 
+            mutate(NW.Hnd = fct_collapse(NW.Hnd, D = Esc_Der)) %>%
+            mutate(NW.Hnd = fct_collapse(NW.Hnd, I = Esc_Izq))
+```
+
+```{r}
+datos %>%
+  select(Sex, NW.Hnd) %>%
+  group_by(Sex, NW.Hnd) %>%
+  count()
+  chisq.test(., correct = F)
+```
+
+
+
+
+
 
 
 
